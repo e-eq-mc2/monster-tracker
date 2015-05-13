@@ -1,11 +1,27 @@
 require 'rubygems'
 require 'arduino_firmata'
 
-arduino = ArduinoFirmata.connect '/dev/tty.usbmodem1421'
+module Ot
+end
+
+require_relative 'utils'
+
+arduino = ArduinoFirmata.connect
 
 puts "firmata version: #{arduino.version}"
 
-arduino.digital_write 13, true
-#arduino.digital_write 13, false
+arduino.on :analog_read do |pin, value| # analog_read event
+  if pin == 0
+    angle = Ot::Utils.map(value, 0, 1023, 0, 180)
+    puts "analog pin #{pin} changed : #{value} #{angle}"
+
+    arduino.servo_write 3, angle
+  end
+end
+
+loop do 
+  #puts arduino.analog_read 0
+  sleep 1
+end
 
 arduino.close
