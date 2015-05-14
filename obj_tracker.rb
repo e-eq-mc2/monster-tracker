@@ -5,43 +5,29 @@ module Ot
 end
 
 require_relative 'utils'
-require_relative 'opencv/face_detector.rb'
+require_relative 'detector'
 
 arduino = ArduinoFirmata.connect
 
 puts "firmata version: #{arduino.version}"
 
-#arduino.on :analog_read do |pin, value| # analog_read event
-#  if pin == 0
-#    angle = Ot::Utils.map(value, 0, 1023, 0, 180)
-#    puts "analog pin #{pin} changed : #{value} #{angle}"
-#
-#    arduino.servo_write 3, angle
-#  end
-#
-#  if pin == 1
-#    angle = Ot::Utils.map(value, 0, 1023, 0, 180)
-#    puts "analog pin #{pin} changed : #{value} #{angle}"
-#
-#    arduino.servo_write 5, angle
-#  end
-#end
-
 SERVO_X = 3
 SERVO_Y = 5
+
+INITIAL_ANGLE = 90
 
 WIDTH  = 1280 / 3
 HEIGHT = 1024 / 3
 
 window = OpenCV::GUI::Window.new("face detect")
 
-detector = Ot::FaceDetector.new(dev: 1, width: WIDTH, height: HEIGHT)
+detector = Ot::Detector::Human.new(dev: 1, width: WIDTH, height: HEIGHT)
 
-angle_x = 90.0
-angle_y = 90.0
+angle_x = INITIAL_ANGLE
+angle_y = INITIAL_ANGLE
 
-arduino.servo_write SERVO_X, angle_x.ceil
-arduino.servo_write SERVO_Y, angle_y.ceil
+arduino.servo_write SERVO_X, angle_x
+arduino.servo_write SERVO_Y, angle_y
 
 while true
   key = OpenCV::GUI::wait_key(1)
@@ -53,8 +39,8 @@ while true
     ratio_x = (dx / detector.rx).abs
     ratio_y = (dy / detector.ry).abs
 
-    da_x = (2.0 * (-(ratio_x - 1.0) ** 4 + 1.0)).ceil
-    da_y = (2.0 * (-(ratio_y - 1.0) ** 4 + 1.0)).ceil
+    da_x = (2.0 * (-(ratio_x - 1.0) ** 4 + 1.0)).floor
+    da_y = (2.0 * (-(ratio_y - 1.0) ** 4 + 1.0)).floor
 
     angle_x = [angle_x + da_x, 180.0].min if dx > 0
     angle_y = [angle_y + da_y, 180.0].min if dy > 0

@@ -3,22 +3,19 @@ require "rubygems"
 require "opencv"
 require "pry"
 
-class Ot::FaceDetector
-  CONFIG_FILE = "#{File.dirname(__FILE__)}/haarcascades/haarcascade_upperbody.xml"
+class Ot::Detector::Human
+  CONFIG_FILE = "#{File.dirname(__FILE__)}/haarcascades/haarcascade_mcs_eyepair_small.xml"
 
   attr_reader :width, :height
 
   def initialize(dev: 0, width: nil, height: nil)
-    @capture = OpenCV::CvCapture.open dev # size: 1280 1024
+    @capture = OpenCV::CvCapture.open dev
+    @capture.size = OpenCV::CvSize.new(width, height)
 
-    @capture.width  = width
-    @capture.height = height
-    #@capture.size = OpenCV::CvSize.new(width, height)
+    @detector = OpenCV::CvHaarClassifierCascade::load CONFIG_FILE
 
     @width  = width
     @height = height
-
-    @detector = OpenCV::CvHaarClassifierCascade::load CONFIG_FILE
   end
 
   def center_x
@@ -56,18 +53,18 @@ if __FILE__ == $0
   WIDTH  = 320
   HEIGHT = 256
 
-  window = OpenCV::GUI::Window.new("face detect")
+  window = OpenCV::GUI::Window.new("detector")
 
   detector = FaceDetector.new(dev: 0, width: WIDTH, height: HEIGHT)
 
   while true
     key = OpenCV::GUI::wait_key(1)
 
-    image = detector.detect do |obj_cx, obj_cy, obj_width, obj_height|
-      diff_x = detector.center_x - obj_cx
-      diff_y = detector.center_y - obj_cy
+    image = detector.detect do |cx, cy, width, height|
+      dx = detector.center_x - cx
+      dy = detector.center_y - cy
 
-      puts "Obj Center #{obj_cx} #{obj_cy} #{obj_width} #{obj_height} #{diff_x} #{diff_y}"
+      puts "Obj Center #{cx} #{cy} #{width} #{height} #{dx} #{dy}"
     end
 
     window.show image
