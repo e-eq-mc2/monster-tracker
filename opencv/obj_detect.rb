@@ -9,38 +9,36 @@ include OpenCV
 
 WIDTH  = 320
 HEIGHT = 256
-window = GUI::Window.new("face detect")
-capture = CvCapture.open 1 # size: 1280 1024
 
+window = GUI::Window.new("face detect")
+capture = CvCapture.open 0 # size: 1280 1024
 capture.width  = WIDTH
 capture.height = HEIGHT
-detector = CvHaarClassifierCascade::load "haarcascades/haarcascade_eye.xml"
 
-image_center = OpenCV::CvPoint2D32f.new(WIDTH * 0.5, HEIGHT * 0.5)
-image_rotate = OpenCV::CvMat.rotation_matrix2D(image_center, 90, 1.0)
+detector = CvHaarClassifierCascade::load "haarcascades/haarcascade_frontalface_alt.xml"
 
 while true
   key = GUI::wait_key(1)
   image = capture.query
 
-  img = image
-    .warp_affine(image_rotate)
-    .flip(:x)
+  image_center_x = image.width  * 0.5
+  image_center_y = image.height * 0.5
 
-  detector.detect_objects(img) do |region|
-    diff_x = image_center.x - region.center.x
-    diff_y = image_center.y - region.center.y
+  detector.detect_objects(image) do |region|
 
-    puts "Center #{region.center.x} #{region.center.y} #{img.width} #{img.height} #{diff_x} #{diff_y}"
+    diff_x = image_center_x - region.center.x
+    diff_y = image_center_y - region.center.y
 
-    img.rectangle! region.top_left, region.bottom_right, :color => CvColor::Red
+    puts "Center #{region.center.x} #{region.center.y} #{image.width} #{image.height} #{diff_x} #{diff_y}"
+
+    image.rectangle! region.top_left, region.bottom_right, :color => CvColor::Red
   end
 
-  window.show img
+  window.show image
 
   next unless key
+
   case key.chr
-  when "\e"
-    exit
+  when "\e" then exit
   end
 end
