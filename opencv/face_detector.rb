@@ -1,31 +1,48 @@
 #!/usr/bin/env ruby
 require "rubygems"
 require "opencv"
+require "pry"
 
-class FaceDetector
-  CONFIG_FILE = "#{File.dirname(__FILE__)}/haarcascades/haarcascade_frontalface_alt.xml"
+class Ot::FaceDetector
+  CONFIG_FILE = "#{File.dirname(__FILE__)}/haarcascades/haarcascade_upperbody.xml"
+
+  attr_reader :width, :height
 
   def initialize(dev: 0, width: nil, height: nil)
     @capture = OpenCV::CvCapture.open dev # size: 1280 1024
 
-    @capture.width  = @width  = width
-    @capture.height = @height = height
+    @capture.width  = width
+    @capture.height = height
+    #@capture.size = OpenCV::CvSize.new(width, height)
+
+    @width  = width
+    @height = height
 
     @detector = OpenCV::CvHaarClassifierCascade::load CONFIG_FILE
   end
 
   def center_x
-    @width * 0.5
+    width * 0.5
   end
 
   def center_y
-    @height * 0.5
+    height * 0.5
+  end
+
+  def rx
+    width * 0.5
+  end
+
+  def ry
+    height * 0.5
   end
 
   def detect
     image = @capture.query
+    regions = @detector.detect_objects(image).to_a
 
-    @detector.detect_objects(image) do |region|
+    region = regions.sort_by {|r| r.width**2 + r.height**2}.last
+    if region
       yield region.center.x, region.center.y, region.width, region.height
 
       image.rectangle! region.top_left, region.bottom_right, :color => OpenCV::CvColor::Red
