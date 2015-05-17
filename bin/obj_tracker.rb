@@ -1,24 +1,35 @@
 require 'bundler'
 Bundler.require
 
+include ESpeak
+
 module Ot
+  class << self
+    def app_root
+      File.expand_path(File.join "#{File.dirname(__FILE__)}", '..')
+    end
+  end
 end
 
 require_relative '../lib/utils'
 require_relative '../lib/detector'
+require_relative '../lib/sender'
 
+WEBCAM = 0
 SERVO_X = 3
 SERVO_Y = 5
 LED_DETECT_STATE = 8
 
 INITIAL_ANGLE = 90
-MAX_ANGLE     = 3
+MAX_ANGLE     = 4
 
-WIDTH  = 1280 / 2
-HEIGHT = 1024 / 2
+WIDTH  = 1280 / 3
+HEIGHT = 1024 / 3
+
+SAVE_INTERVAL = 10
 
 window = OpenCV::GUI::Window.new("face detect")
-detector = Ot::Detector::Human.new(dev: 1, width: WIDTH, height: HEIGHT)
+detector = Ot::Detector::Human.new(dev: WEBCAM, width: WIDTH, height: HEIGHT)
 
 arduino = ArduinoFirmata.connect ARGV.shift
 
@@ -29,6 +40,10 @@ arduino.servo_write SERVO_Y, angle_y
 
 arduino.pin_mode LED_DETECT_STATE, ArduinoFirmata::OUTPUT
 arduino.digital_write LED_DETECT_STATE, false
+
+Speech.new("Hello I am baymax. I'll find monsters.", voice: "en", pitch: 90, speed: 120).speak
+
+saved_at = Time.now
 
 while true
   key = OpenCV::GUI::wait_key(1)
@@ -59,9 +74,21 @@ while true
   end
 
   if detected
-    arduino.digital_write LED_DETECT_STATE, true
+    #puts "#{Time.now - saved_at}"
+    if Time.now - saved_at > SAVE_INTERVAL
+      Speech.new("I found a monster. I am sending its picture.", voice: "en", pitch: 90, speed: 120).speak
+
+      image_path = "#{Ot.app_root}/tmp/#{Ot::Utils.simple_now}.jpg"
+      image.save(image_path)
+
+      Ot::Sender.send(image_path)
+
+      saved_at = Time.now
+    end
+    #arduino.digital_write LED_DETECT_STATE, true
   else
-    arduino.digital_write LED_DETECT_STATE, false
+    saved_at = Time.now
+    #arduino.digital_write LED_DETECT_STATE, false
   end
 
   window.show image

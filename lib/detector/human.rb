@@ -2,10 +2,11 @@
 
 class Ot::Detector::Human
   CONFIG_FILES = [
-    #"#{File.dirname(__FILE__)}/haarcascades/haarcascade_mcs_eyepair_small.xml",
     "#{File.dirname(__FILE__)}/haarcascades/haarcascade_mcs_eyepair_big.xml",
-    "#{File.dirname(__FILE__)}/haarcascades/haarcascade_frontalface_alt2.xml",
-    "#{File.dirname(__FILE__)}/haarcascades/haarcascade_mcs_upperbody.xml",
+    "#{File.dirname(__FILE__)}/haarcascades/haarcascade_frontalface_alt.xml",
+    "#{File.dirname(__FILE__)}/haarcascades/haarcascade_mcs_eyepair_small.xml",
+    #"#{File.dirname(__FILE__)}/haarcascades/haarcascade_profileface.xml",
+    #"#{File.dirname(__FILE__)}/haarcascades/haarcascade_mcs_upperbody.xml",
   ]
 
 
