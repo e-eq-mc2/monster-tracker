@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-class Ot::Detector::Human
+class MT::Detector::Human
   CONFIG_FILES = [
     "#{File.dirname(__FILE__)}/haarcascades/haarcascade_mcs_eyepair_big.xml",
     "#{File.dirname(__FILE__)}/haarcascades/haarcascade_frontalface_alt.xml",

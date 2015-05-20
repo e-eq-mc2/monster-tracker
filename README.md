@@ -1,4 +1,4 @@
-# Obj Tracker
+# Monster Tracker
 
 ## Requirements
 - OpenCV

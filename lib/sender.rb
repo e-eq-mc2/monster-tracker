@@ -1,4 +1,4 @@
-module Ot::Sender
+module MT::Sender
   class << self
     def method
       :post

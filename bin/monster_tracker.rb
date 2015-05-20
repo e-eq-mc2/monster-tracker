@@ -3,7 +3,7 @@ Bundler.require
 
 include ESpeak
 
-module Ot
+module MT
   class << self
     def app_root
       File.expand_path(File.join "#{File.dirname(__FILE__)}", '..')
@@ -29,7 +29,7 @@ HEIGHT = 1024 / 3
 SAVE_INTERVAL = 10
 
 window = OpenCV::GUI::Window.new("face detect")
-detector = Ot::Detector::Human.new(dev: WEBCAM, width: WIDTH, height: HEIGHT)
+detector = MT::Detector::Human.new(dev: WEBCAM, width: WIDTH, height: HEIGHT)
 
 arduino = ArduinoFirmata.connect ARGV.shift
 
@@ -78,10 +78,10 @@ while true
     if Time.now - saved_at > SAVE_INTERVAL
       Speech.new("I found a monster. I am sending its picture.", voice: "en", pitch: 90, speed: 120).speak
 
-      image_path = "#{Ot.app_root}/tmp/#{Ot::Utils.simple_now}.jpg"
+      image_path = "#{MT.app_root}/tmp/#{MT::Utils.simple_now}.jpg"
       image.save(image_path)
 
-      Ot::Sender.send(image_path)
+      MT::Sender.send(image_path)
 
       saved_at = Time.now
     end
