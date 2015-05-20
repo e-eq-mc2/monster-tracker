@@ -1,4 +1,8 @@
 # Obj Tracker
+
+## Requirements
+- OpenCV
+
 ## How to run
 
 ```
