@@ -5,7 +5,7 @@ module Ot::Sender
     end
 
     def url
-      'http://localhost:3000/monsters'
+      'http://52.68.66.77:8080/monsters'
     end
 
     def send(path)
